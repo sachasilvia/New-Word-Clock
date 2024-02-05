@@ -10,10 +10,10 @@
 // *** Defines ***
 
 // Sets offset from GMT (Greenwich Mean Time)
-#define EST -18000; // - Eastern Standard Time
-#define CST -21600; // - Central Standard Time
-#define MST -25200; // - Mountain Standard Time
-#define PST -28800; // - Pacific Standard Time
+#define EST -18000 // - Eastern Standard Time
+#define CST -21600 // - Central Standard Time
+#define MST -25200 // - Mountain Standard Time
+#define PST -28800 // - Pacific Standard Time
 
 #define updateFrequency 1000; // sets how frequently time is checked in ms
 
