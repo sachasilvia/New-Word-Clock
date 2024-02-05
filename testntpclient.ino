@@ -15,7 +15,7 @@
 #define MST -25200 // - Mountain Standard Time
 #define PST -28800 // - Pacific Standard Time
 
-#define updateFrequency 1000; // sets how frequently time is checked in ms
+#define updateFrequency 1000 // sets how frequently time is checked in ms
 
 // *** Variables ***
 
