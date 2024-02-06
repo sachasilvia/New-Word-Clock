@@ -21,13 +21,15 @@
 #define updateFrequency 1000 // Sets how frequently time is checked in ms
 
 // For defining NeoPixel object
-#define PIN 6
+#define PIN GPIO13
 #define NUMPIXELS 129
 
 // *** Variables ***
 
 byte H; // For Hours
 byte M; // For Minutes 
+
+const int GPIO13 = 13;
 
 // Replace with your network credentials (found on the back of router)
 const char* ssid = "TP-Link_51CA";
