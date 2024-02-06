@@ -66,10 +66,10 @@ void loop() {
 
   // Print the values of H and M to the Serial Monitor
   Serial.println("");
-  Serial.println("Hour: ");
-  Serial.print(H);
-  Serial.println("Minute: ");
-  Serial.print(M);
+  Serial.print("Hour: ");
+  Serial.println(H);
+  Serial.print("Minute: ");
+  Serial.println(M);
 
   // Delay until the loop is executed again
   delay(updateFrequency);
