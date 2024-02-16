@@ -1,0 +1,360 @@
+// Credits to Rui Santos for the original code for getting Date and Time from NTP Server: https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
+// Credits to Rui Santos for the original code for creating an interactive slider on a Web Server: https://randomnerdtutorials.com/esp32-web-server-slider-pwm/ 
+// Credits to Ben Dash for his modifications of the slider code to control RGB values: https://github.com/bdash9/ESP32-LED-NeoPixel-webserver-with-slider-controls/tree/main 
+
+// *Note* I recommend reading the comments for the code because they will help explain what everything does and why it's neccessary :)
+
+// *** Libraries ***
+
+// Libraries for Time
+#include <NTPClient.h>
+
+// Libraries for WiFi
+#include <WiFiUdp.h>
+#include <WiFi.h>
+
+// Libraries for Web Server
+#include <ESPAsyncWebServer.h>
+
+// Libraries for LEDs
+#include <Adafruit_NeoPixel.h>
+
+// *** Defines ***
+
+// Sets offset from GMT (Greenwich Mean Time)
+#define EST -18000 // - Eastern Standard Time
+#define CST -21600 // - Central Standard Time
+#define MST -25200 // - Mountain Standard Time
+#define PST -28800 // - Pacific Standard Time
+
+#define updateFrequency 1000 // Sets how frequently time is checked in ms
+
+// For defining NeoPixel object
+#define PIN GPIO13 // Tells what digital pin the NeoPixel is connected to
+#define NUMPIXELS 129 // Tells how many LED pixels exist on the NeoPixel
+
+// *** Variables ***
+
+// Time Variables
+byte H; // For Hours
+byte M; // For Minutes 
+
+// Auxiliary Variables for Sliders and to Store RBG Values
+String redValue = "0"; // Red Slider Value 
+String greenValue = "0"; // Green Silder Value
+String blueValue = "0"; // Blue Slider Value
+
+const char* PARAM_INPUT = "value";
+
+// Variables to Set RGB Values (value sorced from Strings above ^^)
+int redVal = 0; // Sets Red
+int greenVal = 0; // Sets Green
+int blueVal = 0; // Sets Blue
+
+const int GPIO13 = 13; // Define GPIO13 as having an unchanging value of 13
+
+// vvv Replace with your network credentials vvv (found on the back of router)
+const char* ssid = "TP-Link_51CA"; // <-- Type your SSID here in between the ""
+const char* password = "password"; // <-- Type your Password here in between the ""
+
+const long utcOffsetInSeconds = EST; // <-- Set your Timezone (I've only included mainland US abreviations, you can add your own if needed)
+
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
+
+// Define NeoPixel
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+// Set the server port
+AsyncWebServer server(80); // Port 80 is the standard for HTTP communication 
+
+// *** Web Page ***
+// Here is where the actual web page is created, unfortunately because of how HTML is translated I can't add in comments, I recommend following Rui Santos' guide from Random Nerd Tutorials, it is linked at the top of this document ^^
+
+const char index_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Word Clock RGB</title>
+  <style>
+    html {font-family: Arial; display: inline-block; text-align: center;}
+    h2 {font-size: 2.3rem;}
+    p {font-size: 1.9rem;}
+    body {max-width: 400px; margin:0px auto; padding-bottom: 25px;}
+    .slider { -webkit-appearance: none; margin: 14px; width: 360px; height: 25px; background: #D4D4D4;
+      outline: none; -webkit-transition: .2s; transition: opacity .2s;}
+    .slider::-webkit-slider-thumb {-webkit-appearance: none; appearance: none; width: 35px; height: 35px; background: #656C70; cursor: pointer;}
+    .slider::-moz-range-thumb { width: 35px; height: 35px; background: #656C70; cursor: pointer; } 
+    .red { color: red; }
+    .green { color: green; }
+    .blue { color: blue; }
+  </style>
+</head>
+<body>
+  <h2>Word Clock RGB Controller</h2>
+  <p><span style="color:red">Red:</span></p>
+  <p><input type="range" onchange="updateSliderPWM(this, 'red')" id="redSlider" min="0" max="255" value="%REDVALUE%" step="1" class="slider"></p>
+  <p><span style="color:green">Green:</span></p>
+  <p><input type="range" onchange="updateSliderPWM(this, 'green')" id="greenSlider" min="0" max="255" value="%GREENVALUE%" step="1" class="slider"></p>
+  <p><span style="color:blue">Blue:</span></p>
+  <p><input type="range" onchange="updateSliderPWM(this, 'blue')" id="blueSlider" min="0" max="255" value="%BLUEVALUE%" step="1" class="slider"></p>
+
+<script>
+function updateSliderPWM(element, color) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/slider?color=" + color + "&value=" + element.value, true);
+  xhr.send();
+  document.getElementById("text" + color + "Value").innerHTML = element.value;
+  console.log(element.value);
+}
+</script>
+</body>
+</html>
+)rawliteral";
+
+// *** Setting LEDs Function ***
+
+void setled(int, int, int); // Specify the name of the function and say what can be entered, in this case 3 integers
+
+// Function for setting specific LEDs
+void setled(int start, int end, int on) { // Create the three ints the function runs on
+  for (int pixel = start; pixel < end + 1; pixel++) { // Sets what pixels are turned on by taking a start number(entered later), and end number(entered later) and filling the spaces between them
+    if (on == true) { // If the true statement is present during the use of the function
+      pixels.setPixelColor(pixel, pixels.Color(redVal, greenVal, blueVal)); // Set the pixels specified to the color values taken from the web server and stored in ints
+
+    } else { // Else if the true statement is not present during the use of the function
+      pixels.setPixelColor(pixel, pixels.Color(0, 0, 0)); // Turn the specified pixels off
+    }
+    pixels.show(); // Display the changes
+  }
+}
+
+void setup() {
+
+  // Initialize Serial Monitor
+  Serial.begin(115200);
+
+  // Print a start message
+  Serial.print("attempting connection to: ");
+  Serial.println(ssid);
+
+  // Loop until WiFi connects
+  WiFi.begin(ssid, password);
+  while (WiFi.status()!= WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  // Print a success message
+  Serial.println("");
+  Serial.println("WiFi successfully connected!");
+  Serial.print("local ip: ");
+  Serial.println(WiFi.localIP()); // Print the IP adress that can be searched in a web browser to access the web page
+
+  // Initialize a NTPClient to get time
+  timeClient.begin();
+
+  // Initialize and Clear all Pixels
+  pixels.begin();
+  pixels.clear();
+
+server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    String html = String(index_html);
+    html.replace("%REDVALUE%", redValue);
+    html.replace("%GREENVALUE%", greenValue);
+    html.replace("%BLUEVALUE%", blueValue);
+    request->send(200, "text/html", html);
+  });
+
+  server.on("/slider", HTTP_GET, [](AsyncWebServerRequest* request) {
+    String inputMessage;
+    String redMessage;
+    String greenMessage;
+    String blueMessage;
+    String outputMessage;
+    String colorParam;
+    if (request->hasParam(PARAM_INPUT)) {
+      inputMessage = request->getParam(PARAM_INPUT)->value();
+      colorParam = request->getParam("color")->value();
+      if (colorParam == "red") {
+        redValue = inputMessage;
+        redMessage = "Red: " + redValue;
+        redVal = redValue.toInt();
+      }
+      if (colorParam == "green") {
+        greenValue = inputMessage;
+        greenMessage = "Green: " + greenValue;
+        greenVal = greenValue.toInt();
+      }
+      if (colorParam == "blue") {
+        blueValue = inputMessage;
+        blueMessage = "Blue: " + blueValue;
+        blueVal = blueValue.toInt();
+      }
+    }
+    outputMessage = redMessage + "<br>" + greenMessage + "<br>" + blueMessage + "<br>";
+    request->send(200, "text/html", outputMessage);
+  });
+
+  server.begin();
+}
+void loop() {
+
+  // Check the time
+  timeClient.update();
+
+  // Set bytes H and M to Hours and Minutes retrieved from timeClient.update();
+  H = timeClient.getHours();
+  M = timeClient.getMinutes();
+
+  // Print the values of H and M to the Serial Monitor
+  Serial.println("");
+  Serial.print("Hour: ");
+  Serial.println(H);
+  Serial.print("Minute: ");
+  Serial.println(M);
+
+  // Print the RGB values of the NeoPixel to the Serial Monitor
+  Serial.print("Red:  ");
+  Serial.println(redVal);
+  Serial.print("Green:  ");
+  Serial.println(greenVal);
+  Serial.print("Blue:  ");
+  Serial.println(blueVal);
+
+  // *** Setting LEDS based on time ***
+
+  setled(0, 0, true);  // IT
+  setled(2, 3, true);  // IS
+
+  if (M >= 5) { //Sets the parameters that must be true for the statement below to be executed, in this case the variable M (which stores the number of the Minutes that have passed since the start of the Hour) must have a value equal to or greater than 5
+    setled(67, 67, true);  // T for PAS(T) and (T)O         //The "true" statement allows the "if" portion of the setled function to run
+  } else {
+    setled(67, 67, false);                                  //The "false" statement (or anything besides true) forces the else portion of the setled function to run
+  }
+  
+  if (M  >= 5) {
+    setled(47, 53, true);  // MINUTES
+  } else {
+    setled(47, 53, false);
+  }
+
+  if ((M >= 5) && (M <= 34)) {
+    setled(68, 70, true);  // PAST (Techincally turns on PAS)
+  } else {
+    setled(68, 70, false);
+  }
+
+  if (M >= 35) {
+    setled(66, 66, true);  // TO (Technically turns on O)
+  } else {
+    setled(66, 66, false);
+  }
+
+  setled(124, 129, true);  // O'CLOCK
+
+  if (((M >= 5) && (M < 10)) || ((M >= 25) && (M < 30)) || ((M >= 35) && (M < 40)) || (M >= 55)) {
+    setled(29, 32, true);
+  } else {
+    setled(29, 32, false);  // FIVE (Minutes)
+  }
+
+  if (((M >= 10) && (M < 15)) || ((M >= 50) && (M < 55))) {
+    setled(37, 39, true);  // TEN (Minutes)
+  } else {
+    setled(37, 39, false);
+  }
+
+  if (((M >= 15) && (M < 20)) || ((M >= 45) && (M < 50))) {
+    setled(14, 20, true);  // FIFTEEN (Minutes)
+  } else {
+    setled(14, 20, false);
+  }
+
+  if (((M >= 20) && (M < 30)) || ((M >= 35) && (M < 45))) {
+    setled(23, 28, true);  // TWENTY (Minutes)
+  } else {
+    setled(23, 28, false);
+  }
+
+  if ((M >= 30) && (M < 35)) {
+    setled(41, 46, true);  // THIRTY (Minutes)
+  } else {
+    setled(41, 46, false);
+  }
+
+  if (((H == 1) && (M < 35)) || ((H == 13) && (M < 35)) || ((H == 12) && (M >= 35)) || ((H == 0) && (M >= 35))) {
+    setled(107, 109, true);  // ONE (Hours)
+  } else {
+    setled(107, 109, false);
+  }
+
+  if (((H == 2) && (M < 35)) || ((H == 14) && (M < 35)) || ((H == 13) && (M >= 35)) || ((H == 1) && (M >= 35))) {
+    setled(82, 84, true);  // TWO (Hours)
+  } else {
+    setled(82, 84, false);
+  }
+
+  if (((H == 3) && (M < 35)) || ((H == 15) && (M < 35)) || ((H == 14) && (M >= 35)) || ((H == 2) && (M >= 35))) {
+    setled(110, 114, true);  // THREE (Hours)
+  } else {
+    setled(110, 114, false);
+  }
+
+  if (((H == 4) && (M < 35)) || ((H == 16) && (M < 35)) || ((H == 15) && (M >= 35)) || ((H == 3) && (M >= 35))) {
+    setled(60, 63, true);  // FOUR (Hours)
+  } else {
+    setled(60, 63, false);
+  }
+
+  if (((H == 5) && (M < 35)) || ((H == 17) && (M < 35)) || ((H == 16) && (M >= 35)) || ((H == 4) && (M >= 35))) {
+    setled(86, 89, true);  // FIVE (Hours)
+  } else {
+    setled(86, 89, false);
+  }
+
+  if (((H == 6) && (M < 35)) || ((H == 18) && (M < 35)) || ((H == 17) && (M >= 35)) || ((H == 5) && (M >= 35))) {
+    setled(115, 117, true);  // SIX (Hours)
+  } else {
+    setled(115, 117, false);
+  }
+
+  if (((H == 7) && (M < 35)) || ((H == 19) && (M < 35)) || ((H == 18) && (M >= 35)) || ((H == 6) && (M >= 35))) {
+    setled(71, 75, true);  // SEVEN (Hours)
+  } else {
+    setled(71, 75, false);
+  }
+
+  if (((H == 8) && (M < 35)) || ((H == 20) && (M < 35)) || ((H == 19) && (M>= 35)) || ((H == 7) && (M >= 35))) {
+    setled(94, 98, true);  // EIGHT (Hours)
+  } else {
+    setled(94, 98, false);
+  }
+
+  if (((H == 9) && (M < 35)) || ((H == 21) && (M < 35)) || ((H == 20) && (M >= 35)) || ((H == 8) && (M >= 35))) {
+    setled(90, 93, true);  // NINE (Hours)
+  } else {
+    setled(90, 93, false);
+  }
+  if (((H == 10) && (M < 35)) || ((H == 22) && (M < 35)) || ((H == 21) && (M >= 35)) || ((H == 9) && (M >= 35))) {
+    setled(118, 120, true);  // TEN (Hours)
+  } else {
+    setled(118, 120, false);
+  }
+
+  if (((H == 11) && (M < 35)) || ((H == 23) && (M < 35)) || ((H == 22) && (M >= 35)) || ((H == 10) && (M >= 35))) {
+    setled(100, 105, true);  // ELEVEN (Hours)
+  } else {
+    setled(100, 105, false);
+  }
+
+  if (((H == 12) && (M < 35)) || ((H == 0) && (M < 35)) || ((H == 23) && (M >= 35)) || ((H == 11) && (M >= 35))) {
+    setled(77, 81, true);  // TWELVE (Hours)
+  } else {
+    setled(77, 81, false);
+  }
+
+  // Delay until the loop is executed again
+  delay(updateFrequency);
+}
