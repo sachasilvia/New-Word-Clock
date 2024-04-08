@@ -91,6 +91,10 @@
 #define PIN GPIO13 // Tells what digital pin the NeoPixel is connected to
 #define NUMPIXELS 129 // Tells how many LED pixels exist on the NeoPixel
 
+#define sunday 0
+#define march 3
+#define november 11
+
 // *** Variables ***
 
 // Time Variables
@@ -116,6 +120,14 @@ const char* ssid = "TP-Link_51CA"; // <-- Type your SSID here in between the ""
 const char* password = "password"; // <-- Type your Password here in between the ""
 
 const long utcOffsetInSeconds = EST; // <-- Set your Timezone (I've only included mainland US abreviations, you can add your own if needed)
+
+
+String stringmonth;
+String stringday;
+int wday;
+int month;
+int day;  
+int previousSunday;
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
@@ -151,11 +163,11 @@ const char index_html[] PROGMEM = R"rawliteral(
 </head>
 <body>
   <h2>Word Clock RGB Controller</h2>
-  <p><span style="color:red">Red:</span></p>
+  <p><span style="color:red">Red</span></p>
   <p><input type="range" onchange="updateSliderPWM(this, 'red')" id="redSlider" min="0" max="255" value="%REDVALUE%" step="1" class="slider"></p>
-  <p><span style="color:green">Green:</span></p>
+  <p><span style="color:green">Green</span></p>
   <p><input type="range" onchange="updateSliderPWM(this, 'green')" id="greenSlider" min="0" max="255" value="%GREENVALUE%" step="1" class="slider"></p>
-  <p><span style="color:blue">Blue:</span></p>
+  <p><span style="color:blue">Blue</span></p>
   <p><input type="range" onchange="updateSliderPWM(this, 'blue')" id="blueSlider" min="0" max="255" value="%BLUEVALUE%" step="1" class="slider"></p>
 
 <script>
@@ -228,44 +240,60 @@ server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) { // Set the Route f
 
   server.on("/slider", HTTP_GET, [](AsyncWebServerRequest* request) {
     String inputMessage;
-    String redMessage;
-    String greenMessage;
-    String blueMessage;
-    String outputMessage;
     String colorParam;
     if (request->hasParam(PARAM_INPUT)) {
       inputMessage = request->getParam(PARAM_INPUT)->value();
       colorParam = request->getParam("color")->value();
       if (colorParam == "red") {
         redValue = inputMessage;
-        redMessage = "Red: " + redValue;
         redVal = redValue.toInt();
       }
       if (colorParam == "green") {
         greenValue = inputMessage;
-        greenMessage = "Green: " + greenValue;
         greenVal = greenValue.toInt();
       }
       if (colorParam == "blue") {
         blueValue = inputMessage;
-        blueMessage = "Blue: " + blueValue;
         blueVal = blueValue.toInt();
       }
     }
-    outputMessage = redMessage + "<br>" + greenMessage + "<br>" + blueMessage + "<br>";
-    request->send(200, "text/html", outputMessage);
   });
 
   server.begin();
 }
 void loop() {
 
+  String fdate = timeClient.getFormattedDate();
+  stringmonth = fdate.substring(5, 7);
+  stringday = fdate.substring(8, 10);
+
+  month = stringmonth.toInt();
+  day = stringday.toInt();
+  wday = timeClient.getDay();
+
+  previousSunday = day - wday;
+
   // Check the time
   timeClient.update();
 
   // Set bytes H and M to Hours and Minutes retrieved from timeClient.update();
-  H = timeClient.getHours();
-  M = timeClient.getMinutes();
+    if (((month > march) && (month < november)) || 
+     ((month = march) && (previousSunday >= 8)) || 
+     ((month = march) && (day > 14)) || 
+     ((month = november) && (previousSunday <= 1))) {
+    H = timeClient.getHours() + 1; //add the hour for daylight savings
+  }  else {
+    H = timeClient.getHours(); //justs leaves hours without daylight savings
+  }
+    M = timeClient.getMinutes(); 
+
+  // Set month and day strings
+  stringmonth = fdate.substring(5,7);
+  stringday = fdate.substring(8,10);
+
+  month = stringmonth.toInt();
+  day = stringday.toInt();
+  wday = timeClient.getDay();
 
   // Print the values of H and M to the Serial Monitor
   Serial.println("");
@@ -273,6 +301,14 @@ void loop() {
   Serial.println(H);
   Serial.print("Minute: ");
   Serial.println(M);
+
+  // Print DST Test
+  if(H == timeClient.getHours()+1){
+    Serial.println("Is DST");
+  }
+  else if(H == timeClient.getHours()){
+    Serial.println("Not DST");
+  }
 
   // Print the RGB values of the NeoPixel to the Serial Monitor
   Serial.print("Red:  ");
