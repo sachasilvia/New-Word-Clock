@@ -279,9 +279,9 @@ void loop() {
 
   // Set bytes H and M to Hours and Minutes retrieved from timeClient.update(); and apply the daylight savings conditional for H
     if (((month > march) && (month < november)) || 
-     ((month = march) && (previousSunday >= 8)) || 
-     ((month = march) && (day > 14)) || 
-     ((month = november) && (previousSunday <= 1))) {
+     ((month == march) && (previousSunday >= 8)) || 
+     ((month == march) && (day > 14)) || 
+     ((month == november) && (previousSunday <= 1))) {
     H = timeClient.getHours() + 1; //add the hour for daylight savings
   }  else {
     H = timeClient.getHours(); //justs leaves hours without daylight savings
