@@ -91,6 +91,7 @@
 #define PIN GPIO13 // Tells what digital pin the NeoPixel is connected to
 #define NUMPIXELS 129 // Tells how many LED pixels exist on the NeoPixel
 
+// Defines used for daylight savings conditonal
 #define sunday 0
 #define march 3
 #define november 11
@@ -106,9 +107,9 @@ String redValue = "0"; // Red Slider Value
 String greenValue = "0"; // Green Silder Value
 String blueValue = "0"; // Blue Slider Value
 
-const char* PARAM_INPUT = "value";
+const char* PARAM_INPUT = "value"; //for web server control 
 
-// Variables to Set RGB Values (value sorced from Strings above ^^)
+// Variables to Set RGB Values (value sourced from Strings above ^^)
 int redVal = 0; // Sets Red
 int greenVal = 0; // Sets Green
 int blueVal = 0; // Sets Blue
@@ -121,7 +122,7 @@ const char* password = "password"; // <-- Type your Password here in between the
 
 const long utcOffsetInSeconds = EST; // <-- Set your Timezone (I've only included mainland US abreviations, you can add your own if needed)
 
-
+// Variables for daylight savings conditional
 String stringmonth;
 String stringday;
 int wday;
@@ -276,7 +277,7 @@ void loop() {
   // Check the time
   timeClient.update();
 
-  // Set bytes H and M to Hours and Minutes retrieved from timeClient.update();
+  // Set bytes H and M to Hours and Minutes retrieved from timeClient.update(); and apply the daylight savings conditional for H
     if (((month > march) && (month < november)) || 
      ((month = march) && (previousSunday >= 8)) || 
      ((month = march) && (day > 14)) || 
@@ -287,13 +288,15 @@ void loop() {
   }
     M = timeClient.getMinutes(); 
 
-  // Set month and day strings
+  // Set month and day strings to get the needed values from .getFormattedDate() string
   stringmonth = fdate.substring(5,7);
   stringday = fdate.substring(8,10);
 
+  // Set our ints by converting strings to ints
   month = stringmonth.toInt();
   day = stringday.toInt();
-  wday = timeClient.getDay();
+  
+  wday = timeClient.getDay(); // Set weekday with .getDay()
 
   // Print the values of H and M to the Serial Monitor
   Serial.println("");
