@@ -283,8 +283,10 @@ void loop() {
      ((month == march) && (day > 14)) || 
      ((month == november) && (previousSunday <= 1))) {
     H = timeClient.getHours() + 1; //add the hour for daylight savings
+    Serial.println("Is DST"); // Print out test in Serial Monitor
   }  else {
     H = timeClient.getHours(); //justs leaves hours without daylight savings
+    Serial.println("Not DST"); // Print out test in Serial Monitor
   }
     M = timeClient.getMinutes(); 
 
@@ -304,14 +306,6 @@ void loop() {
   Serial.println(H);
   Serial.print("Minute: ");
   Serial.println(M);
-
-  // Print DST Test
-  if(H == timeClient.getHours()+1){
-    Serial.println("Is DST");
-  }
-  else if(H == timeClient.getHours()){
-    Serial.println("Not DST");
-  }
 
   // Print the RGB values of the NeoPixel to the Serial Monitor
   Serial.print("Red:  ");
