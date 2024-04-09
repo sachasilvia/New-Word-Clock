@@ -263,16 +263,18 @@ server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) { // Set the Route f
   server.begin();
 }
 void loop() {
-
+  // Set strings for conversion to their respective existing strings/substrings
   String fdate = timeClient.getFormattedDate();
   stringmonth = fdate.substring(5, 7);
   stringday = fdate.substring(8, 10);
 
+  // Convert strings to ints
   month = stringmonth.toInt();
   day = stringday.toInt();
-  wday = timeClient.getDay();
+  
+  wday = timeClient.getDay(); // Set weekday with the existing function
 
-  previousSunday = day - wday;
+  previousSunday = day - wday; // Create a small function to find the day of the month of the previous Sunday
 
   // Check the time
   timeClient.update();
@@ -289,16 +291,6 @@ void loop() {
     Serial.println("Not DST"); // Print out test in Serial Monitor
   }
     M = timeClient.getMinutes(); 
-
-  // Set month and day strings to get the needed values from .getFormattedDate() string
-  stringmonth = fdate.substring(5,7);
-  stringday = fdate.substring(8,10);
-
-  // Set our ints by converting strings to ints
-  month = stringmonth.toInt();
-  day = stringday.toInt();
-  
-  wday = timeClient.getDay(); // Set weekday with .getDay()
 
   // Print the values of H and M to the Serial Monitor
   Serial.println("");
