@@ -309,134 +309,134 @@ void loop() {
 
   // *** Setting LEDS based on time ***
 
-  setled(0, 0, true);  // IT
-  setled(2, 3, true);  // IS
+  setled(0, 1, true);  // IT
+  setled(3, 4, true);  // IS
 
   if (M >= 5) { //Sets the parameters that must be true for the statement below to be executed, in this case the variable M (which stores the number of the Minutes that have passed since the start of the Hour) must have a value equal to or greater than 5
-    setled(67, 67, true);  // T for PAS(T) and (T)O         //The "true" statement allows the "if" portion of the setled function to run
+    setled(68, 68, true);  // T for PAS(T) and (T)O         //The "true" statement allows the "if" portion of the setled function to run
   } else {
-    setled(67, 67, false);                                  //The "false" statement (or anything besides true) forces the else portion of the setled function to run
+    setled(68, 68, false);                                  //The "false" statement (or anything besides true) forces the else portion of the setled function to run
   }
   
   if (M  >= 5) {
-    setled(47, 53, true);  // MINUTES
+    setled(48, 54, true);  // MINUTES
   } else {
-    setled(47, 53, false);
+    setled(48, 54, false);
   }
 
   if ((M >= 5) && (M <= 34)) {
-    setled(68, 70, true);  // PAST (Techincally turns on PAS)
+    setled(69, 71, true);  // PAST (Techincally turns on PAS)
   } else {
-    setled(68, 70, false);
+    setled(69, 71, false);
   }
 
   if (M >= 35) {
-    setled(66, 66, true);  // TO (Technically turns on O)
+    setled(67, 67, true);  // TO (Technically turns on O)
   } else {
-    setled(66, 66, false);
+    setled(67, 67, false);
   }
 
-  setled(124, 129, true);  // O'CLOCK
+  setled(126, 131, true);  // O'CLOCK
 
   if (((M >= 5) && (M < 10)) || ((M >= 25) && (M < 30)) || ((M >= 35) && (M < 40)) || (M >= 55)) {
-    setled(29, 32, true);
+    setled(30, 33, true);
   } else {
-    setled(29, 32, false);  // FIVE (Minutes)
+    setled(30, 33, false);  // FIVE (Minutes)
   }
 
   if (((M >= 10) && (M < 15)) || ((M >= 50) && (M < 55))) {
-    setled(37, 39, true);  // TEN (Minutes)
+    setled(38, 40, true);  // TEN (Minutes)
   } else {
-    setled(37, 39, false);
+    setled(38, 40, false);
   }
 
   if (((M >= 15) && (M < 20)) || ((M >= 45) && (M < 50))) {
-    setled(14, 20, true);  // FIFTEEN (Minutes)
+    setled(15, 21, true);  // FIFTEEN (Minutes)
   } else {
-    setled(14, 20, false);
+    setled(15, 21, false);
   }
 
   if (((M >= 20) && (M < 30)) || ((M >= 35) && (M < 45))) {
-    setled(23, 28, true);  // TWENTY (Minutes)
+    setled(24, 29, true);  // TWENTY (Minutes)
   } else {
-    setled(23, 28, false);
+    setled(24, 29, false);
   }
 
   if ((M >= 30) && (M < 35)) {
-    setled(41, 46, true);  // THIRTY (Minutes)
+    setled(42, 47, true);  // THIRTY (Minutes)
   } else {
-    setled(41, 46, false);
+    setled(42, 47, false);
   }
 
   if (((H == 1) && (M < 35)) || ((H == 13) && (M < 35)) || ((H == 12) && (M >= 35)) || ((H == 0) && (M >= 35))) {
-    setled(107, 109, true);  // ONE (Hours)
+    setled(109, 111, true);  // ONE (Hours)
   } else {
-    setled(107, 109, false);
+    setled(109, 111, false);
   }
 
   if (((H == 2) && (M < 35)) || ((H == 14) && (M < 35)) || ((H == 13) && (M >= 35)) || ((H == 1) && (M >= 35))) {
-    setled(82, 84, true);  // TWO (Hours)
+    setled(84, 86, true);  // TWO (Hours)
   } else {
-    setled(82, 84, false);
+    setled(84, 86, false);
   }
 
   if (((H == 3) && (M < 35)) || ((H == 15) && (M < 35)) || ((H == 14) && (M >= 35)) || ((H == 2) && (M >= 35))) {
-    setled(110, 114, true);  // THREE (Hours)
+    setled(112, 116, true);  // THREE (Hours)
   } else {
-    setled(110, 114, false);
+    setled(112, 116, false);
   }
 
   if (((H == 4) && (M < 35)) || ((H == 16) && (M < 35)) || ((H == 15) && (M >= 35)) || ((H == 3) && (M >= 35))) {
-    setled(60, 63, true);  // FOUR (Hours)
+    setled(61, 64, true);  // FOUR (Hours)
   } else {
-    setled(60, 63, false);
+    setled(61, 64, false);
   }
 
   if (((H == 5) && (M < 35)) || ((H == 17) && (M < 35)) || ((H == 16) && (M >= 35)) || ((H == 4) && (M >= 35))) {
-    setled(86, 89, true);  // FIVE (Hours)
+    setled(88, 91, true);  // FIVE (Hours)
   } else {
-    setled(86, 89, false);
+    setled(88, 91, false);
   }
 
   if (((H == 6) && (M < 35)) || ((H == 18) && (M < 35)) || ((H == 17) && (M >= 35)) || ((H == 5) && (M >= 35))) {
-    setled(115, 117, true);  // SIX (Hours)
+    setled(117, 119, true);  // SIX (Hours)
   } else {
-    setled(115, 117, false);
+    setled(117, 119, false);
   }
 
   if (((H == 7) && (M < 35)) || ((H == 19) && (M < 35)) || ((H == 18) && (M >= 35)) || ((H == 6) && (M >= 35))) {
-    setled(71, 75, true);  // SEVEN (Hours)
+    setled(72, 76, true);  // SEVEN (Hours)
   } else {
-    setled(71, 75, false);
+    setled(72, 76, false);
   }
 
   if (((H == 8) && (M < 35)) || ((H == 20) && (M < 35)) || ((H == 19) && (M>= 35)) || ((H == 7) && (M >= 35))) {
-    setled(94, 98, true);  // EIGHT (Hours)
+    setled(96, 100, true);  // EIGHT (Hours)
   } else {
-    setled(94, 98, false);
+    setled(96, 100, false);
   }
 
   if (((H == 9) && (M < 35)) || ((H == 21) && (M < 35)) || ((H == 20) && (M >= 35)) || ((H == 8) && (M >= 35))) {
-    setled(90, 93, true);  // NINE (Hours)
+    setled(92, 92, true);  // NINE (Hours)
   } else {
-    setled(90, 93, false);
+    setled(92, 95, false);
   }
   if (((H == 10) && (M < 35)) || ((H == 22) && (M < 35)) || ((H == 21) && (M >= 35)) || ((H == 9) && (M >= 35))) {
-    setled(118, 120, true);  // TEN (Hours)
+    setled(120, 122, true);  // TEN (Hours)
   } else {
-    setled(118, 120, false);
+    setled(120, 122, false);
   }
 
   if (((H == 11) && (M < 35)) || ((H == 23) && (M < 35)) || ((H == 22) && (M >= 35)) || ((H == 10) && (M >= 35))) {
-    setled(100, 105, true);  // ELEVEN (Hours)
+    setled(102, 107, true);  // ELEVEN (Hours)
   } else {
-    setled(100, 105, false);
+    setled(102, 107, false);
   }
 
   if (((H == 12) && (M < 35)) || ((H == 0) && (M < 35)) || ((H == 23) && (M >= 35)) || ((H == 11) && (M >= 35))) {
-    setled(77, 81, true);  // TWELVE (Hours)
+    setled(77, 83, true);  // TWELVE (Hours)
   } else {
-    setled(77, 81, false);
+    setled(77, 83, false);
   }
 
   // Delay until the loop is executed again
