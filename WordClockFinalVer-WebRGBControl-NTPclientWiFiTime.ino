@@ -89,7 +89,7 @@
 
 // For defining NeoPixel object
 #define PIN GPIO13 // Tells what digital pin the NeoPixel is connected to
-#define NUMPIXELS 129 // Tells how many LED pixels exist on the NeoPixel
+#define NUMPIXELS 131 // Tells how many LED pixels exist on the NeoPixel
 
 // Defines used for daylight savings conditonal
 #define sunday 0
