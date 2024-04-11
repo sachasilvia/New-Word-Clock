@@ -21,7 +21,7 @@
 // Hours
 // 64 -> 61 = FOUR
 // 72 -> 76 = SEVEN
-// 77 -> 83 = TWELVE
+// 78 -> 83 = TWELVE
 // 92 -> 95 = NINE
 // 88 -> 91 = FIVE
 // 84 -> 86 = TWO
@@ -129,6 +129,7 @@ int wday;
 int month;
 int day;  
 int previousSunday;
+int firstSunday;
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
@@ -275,6 +276,7 @@ void loop() {
   wday = timeClient.getDay(); // Set weekday with the existing function
 
   previousSunday = day - wday; // Create a small function to find the day of the month of the previous Sunday
+  firstSunday = wday - day; // Function to check if the remainder of weekday - day, negative number = est, positive or 0 = edt
 
   // Check the time
   timeClient.update();
@@ -283,7 +285,7 @@ void loop() {
     if (((month > march) && (month < november)) || 
      ((month == march) && (previousSunday >= 8)) || 
      ((month == march) && (day > 14)) || 
-     ((month == november) && (previousSunday <= 1))) {
+     ((month == november) && (firstSunday >= 0) && (day <= 7))) {
     H = timeClient.getHours() + 1; //add the hour for daylight savings
     Serial.println("Is DST"); // Print out test in Serial Monitor
   }  else {
@@ -434,9 +436,9 @@ void loop() {
   }
 
   if (((H == 12) && (M < 35)) || ((H == 0) && (M < 35)) || ((H == 23) && (M >= 35)) || ((H == 11) && (M >= 35))) {
-    setled(77, 83, true);  // TWELVE (Hours)
+    setled(78, 83, true);  // TWELVE (Hours)
   } else {
-    setled(77, 83, false);
+    setled(78, 83, false);
   }
 
   // Delay until the loop is executed again
