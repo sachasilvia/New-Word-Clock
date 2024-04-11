@@ -417,7 +417,7 @@ void loop() {
   }
 
   if (((H == 9) && (M < 35)) || ((H == 21) && (M < 35)) || ((H == 20) && (M >= 35)) || ((H == 8) && (M >= 35))) {
-    setled(92, 92, true);  // NINE (Hours)
+    setled(92, 95, true);  // NINE (Hours)
   } else {
     setled(92, 95, false);
   }
