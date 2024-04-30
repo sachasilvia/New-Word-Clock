@@ -308,6 +308,7 @@ void loop() {
   Serial.println(greenVal);
   Serial.print("Blue:  ");
   Serial.println(blueVal);
+  Serial.println("");
 
   // *** Setting LEDS based on time ***
 
