@@ -5,4 +5,4 @@ Install this library for NTPClient: https://github.com/taranais/NTPClient
 
 Install this library for ESPAsyncWebServer: https://github.com/me-no-dev/ESPAsyncWebServer
 
-I used an Adafruit Feather ESP32-S2 but any ESP32 will work.
+I used an Adafruit ESP32 HUZZAH Breakout but any ESP32 will work.
